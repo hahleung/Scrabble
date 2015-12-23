@@ -34,13 +34,13 @@ def draw
 end
 
 #PART 4: Form every possible combination with the 7 drawed letters
-def drawing(draw_input)
+def combine(draw_input)
   #Avoid drawing = []
   #Avoid draw_input.length.times ..  
-  drawings = draw_input.map { |_| draw_input.clone }
-  drawings.length.times { |n| drawings[n].slice!(n) }
-  newDrawings = drawings.map { |e| drawing(e)}.flatten(1) + [draw_input]
-  newDrawings.uniq.reject(&:empty?)
+  combinations = draw_input.map { |_| draw_input.clone }
+  combinations.length.times { |n| combinations[n].slice!(n) }
+  new_combinations = combinations.map { |e| combine(e)}.flatten(1) + [draw_input]
+  new_combinations.uniq.reject(&:empty?)
   #Also working: reject(x==[])
   #Also working: reject(|x| x.empty?)
 end

@@ -22,6 +22,7 @@ end
 
 #TEST 3: The 7 letters drawn are included in the stack
 if (draw - stack).any?
+
 #do not write	unless stack.include?(draw[x]) == true, because
 # a == (a == true) when a is a Boolean (redundancy)
 	puts "Test failure No 3:"
@@ -29,14 +30,13 @@ if (draw - stack).any?
   puts "Please review."
 end
 
-
-#TEST 4: The number of possibilities of combination of letters from the 7 drawn letters is correct 
+#TEST 4: The number of possibilities of combination of letters from the 7 drawn letters is correct
 draw_checking = ["A", "B", "C", "D", "E", "F", "G"]
-drawing_checking = drawing(draw_checking)
-unless drawing_checking.size == 2**draw_checking.size - 1
+combine_checking = combine(draw_checking)
+unless combine_checking.size == 2**draw_checking.size - 1
   puts "Test failure No 4:"
   puts "Expected to have 2^n-1 possiblities if all the letters are different."
-  puts "Expected #{2**draw_checking.size - 1} but got #{drawing_checking.size}."
+  puts "Expected #{2**draw_checking.size - 1} but got #{combine_checking.size}."
   puts "Please review."
 end
 
