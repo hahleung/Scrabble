@@ -2,6 +2,7 @@ require_relative 'scrabble.rb'
 
 
 #TEST 1: Sizes of LETTERS and QUANTITY_OF_LETTERS are equal
+#Add VALUES OF LETTERS IN UPDATE
 unless LETTERS.length == QUANTITY_OF_LETTERS.length
 	puts "Test failure No 1:"
 	puts "#{LETTERS.length} letters have been defined."
@@ -22,7 +23,6 @@ end
 
 #TEST 3: The 7 letters drawn are included in the stack
 if (draw - stack).any?
-
 #do not write	unless stack.include?(draw[x]) == true, because
 # a == (a == true) when a is a Boolean (redundancy)
 	puts "Test failure No 3:"
