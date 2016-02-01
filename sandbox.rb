@@ -6,50 +6,53 @@ end
 WORD_BANKS = words
 
 LETTERS = ('a'..'z').to_a
-test = "hello"
+test = "helloa"
 
-upper_bound_ini = WORD_BANKS.length
-lower_bound_ini = 0
-no_iteration_ini = 0
+UPPER_BOUND_INI = WORD_BANKS.length
+LOWER_BOUND_INI = 0
+NO_ITERATION_INI = 0
 N_MAX = 20
 
-def search(word_test, upper_bound, lower_bound, no_iteration)
-  middle_index = ((upper_bound + lower_bound) / 2).to_i
-  
-  if no_iteration > N_MAX
-    p "No results found after #{N_MAX} iterations."
-    return [0]
-    exit
-  else
-    no_iteration += 1
-p no_iteration
-p WORD_BANKS[middle_index]
-  end
+def relative_position(word, index)
+  wordbank = WORD_BANKS[index]
+  wordbank.length.times do |n|
+    if word[n] == nil
+      delta = -1
+    else
+      delta = LETTERS.rindex(word[n]) - LETTERS.rindex(wordbank[n])
+    end
 
-  if word_test == WORD_BANKS[middle_index]
-    p "Found!"
-    return [1]
-  else
-    WORD_BANKS[middle_index].length.times do |i|
-      if word_test[i] == nil
-        search(word_test, middle_index, lower_bound, no_iteration)
-      else
-        delta = LETTERS.rindex(word_test[i]) - LETTERS.rindex(WORD_BANKS[middle_index][i])
-        if delta == 0
-          if (i+1 == WORD_BANKS[middle_index].length)&&(word_test.length > WORD_BANKS[middle_index].length)
-            search(word_test, upper_bound, middle_index, no_iteration)
-          else
-            next        
-          end
-        elsif delta < 0
-          search(word_test, middle_index, lower_bound, no_iteration)
-        else
-          search(word_test, upper_bound, middle_index, no_iteration)
-        end 
-      end
+    if (delta > 0) or ((n+1 == wordbank.length)and(word.length > wordbank.length))
+      return "word_after_wordbank"
+    elsif delta < 0
+      return "word_before_wordbank"
+    elsif (delta == 0)and(n+1 == word.length)
+      return "word_egalto_wordbank"
+    else
+      next
     end
   end
 end
 
-a = search(test, upper_bound_ini, lower_bound_ini, no_iteration_ini)
-p a
+def search(word, upper_bound, lower_bound, no_iteration)
+  middle_index = ((upper_bound + lower_bound) / 2).to_i
+p no_iteration
+p WORD_BANKS[middle_index]
+  if no_iteration > N_MAX
+    p "No results found after #{N_MAX} iterations."
+    return [nil]
+  else
+    no_iteration_next = no_iteration + 1
+  end
+
+  position = relative_position(word, middle_index)
+  if position == "word_after_wordbank"
+    search(word, upper_bound, middle_index, no_iteration_next)
+  elsif position == "word_before_wordbank"
+    search(word, middle_index, lower_bound, no_iteration_next)
+  elsif position == "word_egalto_wordbank"
+    return [1]
+  end
+end
+
+p search(test, UPPER_BOUND_INI, LOWER_BOUND_INI, NO_ITERATION_INI)
