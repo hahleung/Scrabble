@@ -39,19 +39,64 @@ end
 #PART 5: Import existing words database and purge the set of combinations
 #Source : http://www.freescrabbledictionary.com/sowpods/download/sowpods.txt
 def words
-  words_raw = File.readlines("words.txt")
-  words_raw.map { |x| x.delete("\n") }
+  words_bank = File.readlines("words.txt")
+  words_bank.map { |x| x.delete("\n") }
+end
+WORD_BANKS = words
+
+#Function that test if a word is existing or not (dichotomy algorithm)
+UPPER_BOUND_INI = WORD_BANKS.length
+LOWER_BOUND_INI = 0
+NO_ITERATION_INI = 0
+N_MAX = 50
+
+def relative_position(word, index)
+  wordbank = WORD_BANKS[index]
+  wordbank.length.times do |n|
+    if word[n] == nil
+      delta = -1
+    else
+      delta = LETTERS.rindex(word[n]) - LETTERS.rindex(wordbank[n])
+    end
+
+    if (delta > 0) or ((n+1 == wordbank.length)and(word.length > wordbank.length))
+      return "word_after_wordbank"
+    elsif delta < 0
+      return "word_before_wordbank"
+    elsif (delta == 0)and(wordbank.length == word.length)and(n+1 == word.length)
+      return "word_egalto_wordbank"
+    else
+      next
+    end
+  end
 end
 
-def existing_words
-  words_current = words
-  draw_current = draw
+def search(word, upper_bound, lower_bound, no_iteration)
+  middle_index = ((upper_bound + lower_bound) / 2).to_i
+  if no_iteration > N_MAX
+    return [nil]
+  else
+    no_iteration_next = no_iteration + 1
+  end
 
+  position = relative_position(word, middle_index)
+  if position == "word_after_wordbank"
+    search(word, upper_bound, middle_index, no_iteration_next)
+  elsif position == "word_before_wordbank"
+    search(word, middle_index, lower_bound, no_iteration_next)
+  elsif position == "word_egalto_wordbank"
+    return [word]
+  end
+end
+
+#Keep only existing words
+def existing_words
+  draw_current = draw
   p "The 7 letters drawn are:"
   p draw_current
 
   combinations = combine(draw_current).map { |e| e.join }
-  combinations.map { |x| x if words_current.include?(x) }.compact
+  combinations.map{|i| search(i, UPPER_BOUND_INI, LOWER_BOUND_INI, NO_ITERATION_INI)}.flatten.reject{|x| x==nil}
 end
 
 #PART 6: Choose the most valuable word
@@ -72,7 +117,7 @@ def best_word
         best_word = existing_words_current[x]
       end
     end
-    p "These #{existing_words_current.length} words are possible: "
+    p "These #{existing_words_current.length} words are existing: "
     p existing_words_current
     p "The most valuable word is #{best_word} (#{score(best_word)} points)."
   end

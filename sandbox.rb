@@ -6,7 +6,7 @@ end
 WORD_BANKS = words
 
 LETTERS = ('a'..'z').to_a
-test = "helloa"
+test = ["hello", "helloa", "hellos","o"]
 
 UPPER_BOUND_INI = WORD_BANKS.length
 LOWER_BOUND_INI = 0
@@ -26,7 +26,7 @@ def relative_position(word, index)
       return "word_after_wordbank"
     elsif delta < 0
       return "word_before_wordbank"
-    elsif (delta == 0)and(n+1 == word.length)
+    elsif (delta == 0)and(wordbank.length == word.length)and(n+1 == word.length)
       return "word_egalto_wordbank"
     else
       next
@@ -36,11 +36,11 @@ end
 
 def search(word, upper_bound, lower_bound, no_iteration)
   middle_index = ((upper_bound + lower_bound) / 2).to_i
-p no_iteration
+p "iteration: #{no_iteration}"
 p WORD_BANKS[middle_index]
   if no_iteration > N_MAX
     p "No results found after #{N_MAX} iterations."
-    return [nil]
+    return []
   else
     no_iteration_next = no_iteration + 1
   end
@@ -51,8 +51,8 @@ p WORD_BANKS[middle_index]
   elsif position == "word_before_wordbank"
     search(word, middle_index, lower_bound, no_iteration_next)
   elsif position == "word_egalto_wordbank"
-    return [1]
+    return [word]
   end
 end
 
-p search(test, UPPER_BOUND_INI, LOWER_BOUND_INI, NO_ITERATION_INI)
+p test.map{|i| search(i, UPPER_BOUND_INI, LOWER_BOUND_INI, NO_ITERATION_INI)}.flatten.reject{|x| x==nil}
