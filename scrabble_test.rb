@@ -1,48 +1,29 @@
 require_relative 'scrabble.rb'
+require 'minitest/autorun'
 
+class TestScrabble < Minitest::Test
+  #T1: Do the three database arrays have the same length ?
+  def test_check_data_length
+    assert_equal LETTERS.length, QUANTITY_OF_LETTERS.length
+    assert_equal LETTERS.length, VALUES_OF_LETTERS.length
+  end
 
-#TEST 1: Sizes of LETTERS and QUANTITY_OF_LETTERS are equal
-#Add VALUES OF LETTERS IN UPDATE
-unless LETTERS.length == QUANTITY_OF_LETTERS.length
-	puts "Test failure No 1:"
-	puts "#{LETTERS.length} letters have been defined."
-	puts "Number of #{QUANTITY_OF_LETTERS.length} letters are known."
-  puts "Please review."
+  #T2: Does the generated stack have the correct quantity of letters ?
+  def test_stack_sum
+    stack_size = QUANTITY_OF_LETTERS.reduce(0) { |acc,ite| acc + ite }
+    assert_equal stack_size, stack.size
+  end
+
+  #T3: Do all the drawn letters belong to the stack ?
+  def test_draw_included_in_stack
+    assert_equal draw-stack, []
+  end
+
+  #T4: Does the function "combine" give back the expected amount of combinations for 7 letters ?
+  def test_combine_proper_working
+    fictive_draw = %w(a b c d e f g)
+    fictive_combinations = combine(fictive_draw)
+    expected_combinations = 2**fictive_draw.size - 1
+    assert_equal expected_combinations, fictive_combinations.length
+  end
 end
-
-#TEST 2: The size of the stack is correct
-#size_stack = QUANTITY_OF_LETTERS.reduce(0, :+)
-#size_stack = QUANTITY_OF_LETTERS.reduce(0, &:+)
-size_stack = QUANTITY_OF_LETTERS.reduce(0) { |acc, x| acc + x }
-unless size_stack == stack.length
-	puts "Test failure No 2:"
-	puts "#{size_stack} letters have been specified."
-	puts "A stack of #{stack.length} has been generated."
-  puts "Please review."
-end
-
-#TEST 3: The 7 letters drawn are included in the stack
-if (draw - stack).any?
-#do not write	unless stack.include?(draw[x]) == true, because
-# a == (a == true) when a is a Boolean (redundancy)
-	puts "Test failure No 3:"
-	puts "The letter #{draw[x]} is not included in the stack."
-  puts "Please review."
-end
-
-#TEST 4: The number of possibilities of combination of letters from the 7 drawn letters is correct
-draw_checking = ["A", "B", "C", "D", "E", "F", "G"]
-combine_checking = combine(draw_checking)
-unless combine_checking.size == 2**draw_checking.size - 1
-  puts "Test failure No 4:"
-  puts "Expected to have 2^n-1 possiblities if all the letters are different."
-  puts "Expected #{2**draw_checking.size - 1} but got #{combine_checking.size}."
-  puts "Please review."
-end
-
-# require 'minitest/autorun'
-# describe "addition" do
-# 	it "works" do
-# 		(1 + 1).must_equal 3
-# 	end
-# end
