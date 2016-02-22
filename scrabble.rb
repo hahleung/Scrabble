@@ -7,20 +7,7 @@ VALUES_OF_LETTERS = [1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1
 
 #PART 2: Generate the stack from database
 def stack
-  stack_sum = QUANTITY_OF_LETTERS.reduce(0) { |acc, x| acc + x }
-  stack = []
-  current_counter = 0
-  counter = QUANTITY_OF_LETTERS[current_counter]
-  stack_sum.times do |x|
-    if x < counter
-      stack[x] = LETTERS[current_counter]
-    else
-      current_counter = current_counter + 1
-      counter = counter + QUANTITY_OF_LETTERS[current_counter]
-      stack[x] = LETTERS[current_counter]
-    end
-  end
-  stack
+  LETTERS.map{|x| [x]*QUANTITY_OF_LETTERS[LETTERS.index(x)]}.flatten.shuffle
 end
 	
 #PART 3: Draw 7 letters from the stack
@@ -30,41 +17,41 @@ end
 
 #PART 4: Form every possible combination with the 7 drawed letters
 def combine(draw_input)
-  combinations = draw_input.map { |_| draw_input.clone }
-  combinations.length.times { |x| combinations[x].slice!(x) }
-  new_combinations = combinations.map { |e| combine(e) }.flatten(1) + [draw_input]
-  new_combinations.uniq.reject(&:empty?)
+  letters_amount = Array(0..(draw_input.length-1))
+  combinations = letters_amount.map{ |x| (letters_amount - [x]).map{ |z| draw_input[z] } }
+  smaller_combinations = combinations.map { |e| combine(e) }.flatten(1) + [draw_input]
+  smaller_combinations.uniq.reject(&:empty?)
 end
 
 #PART 5: Import existing words database and purge the set of combinations
 #Source : http://www.freescrabbledictionary.com/sowpods/download/sowpods.txt
 def words
-  words_bank = File.readlines("words.txt")
-  words_bank.map { |x| x.delete("\n") }
+  scrabble_words = File.readlines("words.txt")
+  scrabble_words.map { |x| x.delete("\n") }
 end
-WORD_BANKS = words
+SCRABBLE_WORDS = words
 
 #Function that test if a word is existing or not (dichotomy algorithm)
-UPPER_BOUND_INI = WORD_BANKS.length
+UPPER_BOUND_INI = SCRABBLE_WORDS.length
 LOWER_BOUND_INI = 0
 NO_ITERATION_INI = 0
 N_MAX = 50
 
 def relative_position(word, index)
-  wordbank = WORD_BANKS[index]
-  wordbank.length.times do |n|
+  authorized_word = SCRABBLE_WORDS[index]
+  authorized_word.length.times do |n|
     if word[n] == nil
       delta = -1
     else
-      delta = LETTERS.rindex(word[n]) - LETTERS.rindex(wordbank[n])
+      delta = LETTERS.rindex(word[n]) - LETTERS.rindex(authorized_word[n])
     end
 
-    if (delta > 0) or ((n+1 == wordbank.length)and(word.length > wordbank.length))
-      return "word_after_wordbank"
+    if (delta > 0) || ((n+1 == authorized_word.length)&&(word.length > authorized_word.length))
+      return "word_after_authorized_word"
     elsif delta < 0
-      return "word_before_wordbank"
-    elsif (delta == 0)and(wordbank.length == word.length)and(n+1 == word.length)
-      return "word_egalto_wordbank"
+      return "word_before_authorized_word"
+    elsif (delta == 0)&&(authorized_word.length == word.length)&&(n+1 == word.length)
+      return "word_egalto_authorized_word"
     else
       next
     end
@@ -80,11 +67,11 @@ def search(word, upper_bound, lower_bound, no_iteration)
   end
 
   position = relative_position(word, middle_index)
-  if position == "word_after_wordbank"
+  if position == "word_after_authorized_word"
     search(word, upper_bound, middle_index, no_iteration_next)
-  elsif position == "word_before_wordbank"
+  elsif position == "word_before_authorized_word"
     search(word, middle_index, lower_bound, no_iteration_next)
-  elsif position == "word_egalto_wordbank"
+  elsif position == "word_egalto_authorized_word"
     return [word]
   end
 end
