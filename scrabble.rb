@@ -60,11 +60,8 @@ end
 
 def search(word, upper_bound, lower_bound, no_iteration)
   middle_index = ((upper_bound + lower_bound) / 2).to_i
-  if no_iteration > N_MAX
-    return [nil]
-  else
-    no_iteration_next = no_iteration + 1
-  end
+  return [nil] if no_iteration > N_MAX
+  no_iteration_next = no_iteration + 1
 
   position = relative_position(word, middle_index)
   if position == "word_after_authorized_word"
@@ -88,26 +85,19 @@ end
 
 #PART 6: Choose the most valuable word
 def score(word)
-  score = 0
-  word.length.times { |x| score += VALUES_OF_LETTERS[LETTERS.index(word[x])]}
-  score
+  LETTERS.zip(VALUES_OF_LETTERS).map{|x| word.count(x[0])*x[1] }.reduce(:+)
 end
 
-def best_word
-  best_word = []
-  existing_words_current = existing_words
-  if existing_words_current.empty?
-    p 'Sorry, no word available.'
-  else
-    existing_words_current.length.times do |x|
-      if score(best_word) < score(existing_words_current[x])
-        best_word = existing_words_current[x]
-      end
-    end
-    p "These #{existing_words_current.length} words are existing: "
-    p existing_words_current
-    p "The most valuable word is #{best_word} (#{score(best_word)} points)."
-  end
-  best_word
+def best_word(set_words)
+  return "Sorry, no word available." if set_words.empty?
+  scores = set_words.reduce({}) { |acc,ite| acc.merge({ite => score(ite)}) }
+  best_words = scores.select{ |k,v| v >= scores.values.max }.keys
+
+  p "These #{set_words.length} words are existing: "
+  p set_words
+  p "Among these words, the #{best_words.length} following words make the higher score:"
+  best_words.each{ |x| p x }
+  p "(with #{scores.values.max} points)"
 end
-best_word
+
+best_word(existing_words)
