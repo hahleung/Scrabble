@@ -35,40 +35,27 @@ SCRABBLE_WORDS = words
 UPPER_BOUND_INI = SCRABBLE_WORDS.length
 LOWER_BOUND_INI = 0
 NO_ITERATION_INI = 0
-N_MAX = 50
+N_MAX = 30
 
 def relative_position(word, index)
   authorized_word = SCRABBLE_WORDS[index]
-  authorized_word.length.times do |n|
-    if word[n] == nil
-      delta = -1
-    else
-      delta = LETTERS.rindex(word[n]) - LETTERS.rindex(authorized_word[n])
-    end
-
-    if (delta > 0) || ((n+1 == authorized_word.length)&&(word.length > authorized_word.length))
-      return "word_after_authorized_word"
-    elsif delta < 0
-      return "word_before_authorized_word"
-    elsif (delta == 0)&&(authorized_word.length == word.length)&&(n+1 == word.length)
-      return "word_egalto_authorized_word"
-    else
-      next
-    end
-  end
+  return :after if word > authorized_word
+  return :before if word < authorized_word
+  return :equalto if word == authorized_word
 end
 
-def search(word, upper_bound, lower_bound, no_iteration)
+def search(word, lower_bound, upper_bound, no_iteration)
   middle_index = ((upper_bound + lower_bound) / 2).to_i
   return [nil] if no_iteration > N_MAX
   no_iteration_next = no_iteration + 1
 
   position = relative_position(word, middle_index)
-  if position == "word_after_authorized_word"
-    search(word, upper_bound, middle_index, no_iteration_next)
-  elsif position == "word_before_authorized_word"
-    search(word, middle_index, lower_bound, no_iteration_next)
-  elsif position == "word_egalto_authorized_word"
+  case position
+  when :before
+    search(word, middle_index, upper_bound, no_iteration_next)
+  when :after
+    search(word, lower_bound, middle_index, no_iteration_next)
+  when :equalto
     return [word]
   end
 end
@@ -78,8 +65,9 @@ def existing_words
   draw_current = draw
   p "The 7 letters drawn are:"
   p draw_current
+  p "-"*70
 
-  combinations = combine(draw_current).map { |e| e.join }
+  combinations = combine(draw_current).flat_map{ |w| w.permutation.to_a}.uniq.map { |e| e.join }
   combinations.map{|i| search(i, UPPER_BOUND_INI, LOWER_BOUND_INI, NO_ITERATION_INI)}.flatten.reject{|x| x==nil}
 end
 
@@ -88,16 +76,18 @@ def score(word)
   LETTERS.zip(VALUES_OF_LETTERS).map{|x| word.count(x[0])*x[1] }.reduce(:+)
 end
 
-def best_word(set_words)
+def best_word
+  set_words = existing_words
   return "Sorry, no word available." if set_words.empty?
-  scores = set_words.reduce({}) { |acc,ite| acc.merge({ite => score(ite)}) }
+  scores = set_words.reduce({}) { |acc, ite| acc.merge({ite => score(ite)}) }
   best_words = scores.select{ |k,v| v >= scores.values.max }.keys
 
   p "These #{set_words.length} words are existing: "
   p set_words
+  p "-"*70
   p "Among these words, the #{best_words.length} following words make the higher score:"
   best_words.each{ |x| p x }
   p "(with #{scores.values.max} points)"
 end
 
-best_word(existing_words)
+best_word
